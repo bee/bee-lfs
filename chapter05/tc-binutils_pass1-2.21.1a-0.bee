@@ -29,15 +29,15 @@ EXCLUDE="^${PREFIX}/share"
 mee_configure() {
     ${S}/configure \
         --target=${LFS_TGT} \
-        --prefix=${LFS_PREFIX} \
+        --prefix=${PREFIX} \
         --disable-nls \
         --disable-werror
 }
 
 mee_install() {
     if [ "$(uname -m)" = "x86_64" ] ; then
-        mkdir -pv ${D}/${LFS_PREFIX}/lib
-        ln -sv lib ${D}/${LFS_PREFIX}/lib64
+        mkdir -pv ${D}/${PREFIX}/lib
+        ln -sv lib ${D}/${PREFIX}/lib64
     fi
 
     # call the bee installer..

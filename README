@@ -1,0 +1,16 @@
+BEE-LFS - bee for linux from scratch
+  by Marius Tolzmann <marius@mariux.de> 2011
+
+This [0] is a repository of bee-files to create a linux from scratch (LFS).
+
+The bee-files are based on the LFS BOOK v7.0 [1].
+
+They can be build using bee [2].
+
+All files in this repository are distributed in the hope that it will
+be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+[0] https://github.com/mariux/bee-lfs
+[1] http://www.linuxfromscratch.org/lfs/view/7.0/
+[2] https://github.com/mariux/bee

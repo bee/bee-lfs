@@ -1,0 +1,45 @@
+#!/usr/bin/env beesh
+#
+# this file is part of bee-lfs v7.0
+#  by Marius Tolzmann <marius@mariux.de> 2011
+#
+# this is the bee-file for binutils pass1
+# see LFS 7.0 chapter 5: 5.4.1
+# http://www.linuxfromscratch.org/lfs/view/7.0/chapter05/binutils-pass1.html
+#
+
+SRCURL[0]="http://ftp.gnu.org/gnu/binutils/binutils-${PKGVERSION}.tar.bz2"
+
+# setup LFS mountpoint and LFS_TGT..
+
+: ${LFS=/mnt/lfs}
+: ${LFS_TGT=$(uname -m)-lfs-linux-gnu}
+
+# let the /tools prefix be overwritable
+PREFIX=${LFS_PREFIX=/tools}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+
+# we don't need manpages and info files in this package
+EXCLUDE="^${PREFIX}/share"
+
+# we just need to change the configure and install section..
+
+mee_configure() {
+    ${S}/configure \
+        --target=${LFS_TGT} \
+        --prefix=${LFS_PREFIX} \
+        --disable-nls \
+        --disable-werror
+}
+
+mee_install() {
+    if [ "$(uname -m)" = "x86_64" ] ; then
+        mkdir -pv ${D}/${LFS_PREFIX}/lib
+        ln -sv lib ${D}/${LFS_PREFIX}/lib64
+    fi
+
+    # call the bee installer..
+    bee_install
+}

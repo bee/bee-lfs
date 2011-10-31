@@ -1,0 +1,76 @@
+#!/bin/env beesh
+#
+# this file is part of bee-lfs v7.0
+#  by Marius Tolzmann <marius@mariux.de> 2011
+#
+# this is the bee-file for gcc pass1
+# see LFS 7.0 chapter 5: 5.5.1
+# http://www.linuxfromscratch.org/lfs/view/7.0/chapter05/gcc-pass1.html
+#
+
+MPFR_VERSION=3.1.0
+GMP_VERSION=5.0.2
+MPC_VERSION=0.9
+
+SRCURL[0]="http://ftp.gnu.org/gnu/gcc/gcc-${PKGVERSION}/gcc-${PKGVERSION}.tar.bz2"
+SRCURL[1]="http://www.mpfr.org/mpfr-${MPFR_VERSION}/mpfr-${MPFR_VERSION}.tar.bz2"
+SRCURL[2]="http://ftp.gnu.org/gnu/gmp/gmp-${GMP_VERSION}.tar.bz2"
+SRCURL[3]="http://www.multiprecision.org/mpc/download/mpc-${MPC_VERSION}.tar.gz"
+
+PATCHURL[0]="http://www.linuxfromscratch.org/patches/lfs/7.0/gcc-4.6.1-cross_compile-1.patch"
+
+# setup LFS mountpoint and LFS_TGT..
+
+: ${LFS=/mnt/lfs}
+: ${LFS_TGT=$(uname -m)-lfs-linux-gnu}
+
+# let the /tools prefix be overwritable
+PREFIX=${LFS_PREFIX=/tools}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+
+# we don't need manpages and info files in this package
+#EXCLUDE="^${PREFIX}/share"
+
+mee_patch() {
+    # setup source directory..
+    mv -v ${S}/mpfr-${MPFR_VERSION} ${S}/mpfr
+    mv -v ${S}/gmp-${GMP_VERSION}   ${S}/gmp
+    mv -v ${S}/mpc-${MPC_VERSION}   ${S}/mpc
+
+    # patch sources..
+    bee_patch
+}
+
+mee_configure() {
+    start_cmd ${S}/configure \
+      --target=${LFS_TGT} \
+      --prefix=${PREFIX} \
+      --disable-nls \
+      --disable-shared \
+      --disable-multilib \
+      --disable-decimal-float \
+      --disable-threads \
+      --disable-libmudflap \
+      --disable-libssp \
+      --disable-libgomp \
+      --disable-libquadmath \
+      --disable-target-libiberty \
+      --disable-target-zlib \
+      --enable-languages=c \
+      --without-ppl \
+      --without-cloog \
+      --with-mpfr-include=${S}/mpfr/src \
+      --with-mpfr-lib=${S}/mpfr/src/.libs
+}
+
+mee_install() {
+     bee_install
+
+     gcc=${D}/${PREFIX}/bin/${LFS_TGT}-gcc
+
+     libgcceh=$(${gcc} -print-libgcc-file-name | sed 's/libgcc/&_eh/')
+
+     start_cmd ln -vs libgcc.a ${libgcceh}
+}

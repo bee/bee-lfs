@@ -4,7 +4,7 @@
 #  by Marius Tolzmann <marius@mariux.de> 2011
 #
 # this is the bee-file for gcc pass1
-# see LFS 7.0 chapter 5: 5.5.1
+# see LFS 7.0 chapter 5: 5.5
 # http://www.linuxfromscratch.org/lfs/view/7.0/chapter05/gcc-pass1.html
 #
 require_version 1.0_rc17
@@ -20,29 +20,24 @@ SRCURL[3]="http://www.multiprecision.org/mpc/download/mpc-${MPC_VERSION}.tar.gz"
 
 PATCHURL[0]="http://www.linuxfromscratch.org/patches/lfs/7.0/gcc-4.6.1-cross_compile-1.patch"
 
-# setup LFS mountpoint and LFS_TGT..
-
-: ${LFS=/mnt/lfs}
+# set LFS_TGT if not set..
 : ${LFS_TGT=$(uname -m)-lfs-linux-gnu}
 
-# let the /tools prefix be overwritable
+# set PREFIX to LFS_PREFIX (default: /tools)
 PREFIX=${LFS_PREFIX=/tools}
 
 # set explicit PATH
 export PATH=${PREFIX}/bin:/bin:/usr/bin
 
-# we don't need manpages and info files in this package
-#EXCLUDE="^${PREFIX}/share"
-
 # before applying any patches:
 #    setup source directory..
 mee_patch_pre() {
-    mv -v ${S}/mpfr-${MPFR_VERSION} ${S}/mpfr
-    mv -v ${S}/gmp-${GMP_VERSION}   ${S}/gmp
-    mv -v ${S}/mpc-${MPC_VERSION}   ${S}/mpc
+    start_cmd mv -v ${S}/mpfr-${MPFR_VERSION} ${S}/mpfr
+    start_cmd mv -v ${S}/gmp-${GMP_VERSION}   ${S}/gmp
+    start_cmd mv -v ${S}/mpc-${MPC_VERSION}   ${S}/mpc
 }
 
-# overwrite configure..
+# use non-default configure options..
 mee_configure() {
     start_cmd ${S}/configure \
       --target=${LFS_TGT} \

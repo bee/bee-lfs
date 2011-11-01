@@ -4,31 +4,25 @@
 #  by Marius Tolzmann <marius@mariux.de> 2011
 #
 # this is the bee-file for binutils pass1
-# see LFS 7.0 chapter 5: 5.4.1
+# see LFS 7.0 chapter 5: 5.4
 # http://www.linuxfromscratch.org/lfs/view/7.0/chapter05/binutils-pass1.html
 #
 require_version 1.0_rc17
 
 SRCURL[0]="http://ftp.gnu.org/gnu/binutils/binutils-${PKGVERSION}.tar.bz2"
 
-# setup LFS mountpoint and LFS_TGT..
-
-: ${LFS=/mnt/lfs}
+# set LFS_TGT if not set..
 : ${LFS_TGT=$(uname -m)-lfs-linux-gnu}
 
-# let the /tools prefix be overwritable
+# set PREFIX to LFS_PREFIX (default: /tools)
 PREFIX=${LFS_PREFIX=/tools}
 
 # set explicit PATH
 export PATH=${PREFIX}/bin:/bin:/usr/bin
 
-# we don't need manpages and info files in this package
-EXCLUDE="^${PREFIX}/share"
-
-# we just need to change the configure and install section..
-
+# use non-default configure options..
 mee_configure() {
-    ${S}/configure \
+    start_cmd ${S}/configure \
         --target=${LFS_TGT} \
         --prefix=${PREFIX} \
         --disable-nls \
@@ -38,7 +32,7 @@ mee_configure() {
 # before installing we need to fix the lib vs. lib64 issue:
 mee_install_pre() {
     if [ "$(uname -m)" = "x86_64" ] ; then
-        mkdir -pv ${D}/${PREFIX}/lib
-        ln -sv lib ${D}/${PREFIX}/lib64
+        start_cmd mkdir -pv ${D}/${PREFIX}/lib
+        start_cmd ln -sv lib ${D}/${PREFIX}/lib64
     fi
 }

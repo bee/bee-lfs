@@ -7,6 +7,7 @@
 # see LFS 7.0 chapter 5: 5.5.1
 # http://www.linuxfromscratch.org/lfs/view/7.0/chapter05/gcc-pass1.html
 #
+require_version 1.0_rc17
 
 MPFR_VERSION=3.1.0
 GMP_VERSION=5.0.2
@@ -33,16 +34,15 @@ export PATH=${PREFIX}/bin:/bin:/usr/bin
 # we don't need manpages and info files in this package
 #EXCLUDE="^${PREFIX}/share"
 
-mee_patch() {
-    # setup source directory..
+# before applying any patches:
+#    setup source directory..
+mee_patch_pre() {
     mv -v ${S}/mpfr-${MPFR_VERSION} ${S}/mpfr
     mv -v ${S}/gmp-${GMP_VERSION}   ${S}/gmp
     mv -v ${S}/mpc-${MPC_VERSION}   ${S}/mpc
-
-    # patch sources..
-    bee_patch
 }
 
+# overwrite configure..
 mee_configure() {
     start_cmd ${S}/configure \
       --target=${LFS_TGT} \
@@ -65,12 +65,9 @@ mee_configure() {
       --with-mpfr-lib=${S}/mpfr/src/.libs
 }
 
-mee_install() {
-     bee_install
-
+# after installing: fix a link
+mee_install_post() {
      gcc=${D}/${PREFIX}/bin/${LFS_TGT}-gcc
-
      libgcceh=$(${gcc} -print-libgcc-file-name | sed 's/libgcc/&_eh/')
-
      start_cmd ln -vs libgcc.a ${libgcceh}
 }

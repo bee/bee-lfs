@@ -39,6 +39,11 @@ mee_patch_pre() {
 
 # use non-default configure options..
 mee_configure() {
+
+    # converting variables from LFS to bee
+    # $(pwd)/../gcc-x.x is source dir ${S}
+    # $(pwd)            is build dir ${B}
+
     start_cmd ${S}/configure \
       --target=${LFS_TGT} \
       --prefix=${PREFIX} \

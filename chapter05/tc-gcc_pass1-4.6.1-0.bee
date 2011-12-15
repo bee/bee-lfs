@@ -57,7 +57,7 @@ mee_configure() {
       --without-ppl \
       --without-cloog \
       --with-mpfr-include=${S}/mpfr/src \
-      --with-mpfr-lib=${S}/mpfr/src/.libs
+      --with-mpfr-lib=${B}/mpfr/src/.libs
 }
 
 # after installing: fix a link

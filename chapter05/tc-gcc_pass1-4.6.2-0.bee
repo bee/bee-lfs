@@ -1,16 +1,15 @@
 #!/usr/bin/env beesh
 #
-# this file is part of bee-lfs v7.0
+# this file is part of bee-lfs v7.1
 #  by Marius Tolzmann <marius@mariux.de> 2011
 #
 # this is the bee-file for gcc pass1
-# see LFS 7.0 chapter 5: 5.5
-# http://www.linuxfromscratch.org/lfs/view/7.0/chapter05/gcc-pass1.html
+# see LFS 7.1 chapter 5: 5.5
+# http://www.linuxfromscratch.org/lfs/view/7.1/chapter05/gcc-pass1.html
 #
-require_version 1.0_rc17
 
 MPFR_VERSION=3.1.0
-GMP_VERSION=5.0.2
+GMP_VERSION=5.0.4
 MPC_VERSION=0.9
 
 SRCURL[0]="http://ftp.gnu.org/gnu/gcc/gcc-${PKGVERSION}/gcc-${PKGVERSION}.tar.bz2"
@@ -18,7 +17,7 @@ SRCURL[1]="http://www.mpfr.org/mpfr-${MPFR_VERSION}/mpfr-${MPFR_VERSION}.tar.bz2
 SRCURL[2]="http://ftp.gnu.org/gnu/gmp/gmp-${GMP_VERSION}.tar.bz2"
 SRCURL[3]="http://www.multiprecision.org/mpc/download/mpc-${MPC_VERSION}.tar.gz"
 
-PATCHURL[0]="http://www.linuxfromscratch.org/patches/lfs/7.0/gcc-4.6.1-cross_compile-1.patch"
+PATCHURL[0]="http://www.linuxfromscratch.org/patches/lfs/7.1/gcc-4.6.2-cross_compile-1.patch"
 
 # set LFS_TGT if not set..
 : ${LFS_TGT=$(uname -m)-lfs-linux-gnu}

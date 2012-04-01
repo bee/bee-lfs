@@ -1,0 +1,40 @@
+#!/usr/bin/env beesh
+#
+# this file is part of bee-lfs v7.1
+#  by Marius Tolzmann <marius@mariux.de> 2011-2012
+#
+# this is the bee-file for gcc pass1
+# see LFS 7.1 chapter 5: 5.11
+# http://www.linuxfromscratch.org/lfs/view/7.1/chapter05/tcl.html
+#
+
+SRCURL[0]="http://prdownloads.sourceforge.net/tcl/tcl${PKGVERSION}-src.tar.gz"
+
+# set PREFIX to LFS_PREFIX (default: /tools)
+PREFIX=${LFS_PREFIX=/tools}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+
+# since the configure script ist located in the directory 'unix'
+# autodetection of buildtype does not work in bee
+# and we need to define all needed steps
+
+mee_configure() {
+    start_cmd ${S}/unix/configure \
+      --prefix=${PREFIX}
+}
+
+mee_build() {
+    start_cmd make
+}
+
+mee_install() {
+    start_cmd make install DESTDIR=${D}
+    start_cmd make install-private-headers DESTDIR=${D}
+}
+
+mee_install_post() {
+    start_cmd chmod -v u+w ${D}${PREFIX}/lib/libtcl${PKGVERSION[2]}.so
+    start_cmd ln -sv tclsh${PKGVERSION[2]} ${D}${PREFIX}/bin/tclsh
+}

@@ -1,0 +1,56 @@
+#!/usr/bin/env beesh
+#
+# this file is part of bee-lfs v7.1
+#  by Marius Tolzmann <marius@mariux.de> 2011-2012
+#
+# this is the bee-file for gcc pass1
+# see LFS 7.1 chapter 5: 5.7
+# http://www.linuxfromscratch.org/lfs/view/7.1/chapter05/glibc.html
+#
+
+SRCURL[0]="http://ftp.gnu.org/gnu/glibc/glibc-${PKGVERSION}.tar.bz2"
+
+PATCHURL[0]="http://www.linuxfromscratch.org/patches/lfs/7.1/glibc-${PKGVERSION}-fixes-1.patch"
+PATCHURL[1]="http://www.linuxfromscratch.org/patches/lfs/7.1/glibc-${PKGVERSION}-cpuid-1.patch"
+
+# set LFS_TGT if not set..
+: ${LFS_TGT=$(uname -m)-lfs-linux-gnu}
+
+# set PREFIX to LFS_PREFIX (default: /tools)
+PREFIX=${LFS_PREFIX=/tools}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+
+mee_configure_pre() {
+    case `uname -m` in
+        i?86) echo "CFLAGS += -march=i486 -mtune=native" > configparms ;;
+    esac
+}
+
+# use non-default configure options..
+mee_configure() {
+    start_cmd ${S}/configure \
+      --prefix=${PREFIX} \
+      --host=${LFS_TGT} \
+      --build=$(${S}/scripts/config.guess) \
+      --disable-profile \
+      --enable-add-ons \
+      --enable-kernel=2.6.25 \
+      --with-headers=${PREFIX}/include \
+      libc_cv_forced_unwind=yes \
+      libc_cv_c_cleanup=yes
+}
+
+mee_install() {
+    start_cmd make install install_root=${D}
+}
+
+# before installing we need to fix the lib vs. lib64 issue:
+#mee_install_pre() {
+#    if [ "$(uname -m)" = "x86_64" ] ; then
+#        start_cmd mkdir -pv ${D}/${PREFIX}/lib
+#        start_cmd ln -sv lib ${D}/${PREFIX}/lib64
+#    fi
+#}
+

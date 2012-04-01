@@ -1,0 +1,37 @@
+#!/usr/bin/env beesh
+#
+# this file is part of bee-lfs v7.1
+#  by Marius Tolzmann <marius@mariux.de> 2011-2012
+#
+# this is the bee-file for gcc pass1
+# see LFS 7.1 chapter 5: 5.6
+# http://www.linuxfromscratch.org/lfs/view/7.1/chapter05/linux-headers.html
+#
+
+SRCURL[0]="http://www.kernel.org/pub/linux/kernel/v3.x/linux-${PKGVERSION}.tar.xz"
+
+# set PREFIX to LFS_PREFIX (default: /tools)
+PREFIX=${LFS_PREFIX=/tools}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+
+# we may not need those even if LFS installs them:
+EXCLUDE=( .install ..install.cmd )
+
+# build the kernel in its source dir
+build_in_sourcedir
+
+# cleanup in the configure pass
+mee_configure() {
+    make mrproper
+}
+
+mee_build() {
+    make headers_check
+}
+
+# install the headers directly in the image dir - no need to copy them afterwards
+mee_install() {
+    make INSTALL_HDR_PATH=${D}/${PREFIX} headers_install
+}

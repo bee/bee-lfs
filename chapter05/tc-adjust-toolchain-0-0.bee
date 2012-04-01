@@ -1,0 +1,67 @@
+#!/usr/bin/env beesh
+#
+# this file is part of bee-lfs v7.1
+#  by Marius Tolzmann <marius@mariux.de> 2011-2012
+#
+# this is the bee-file which installs the "adjusted toolchain"
+# see LFS 7.1 chapter 5: 5.8
+# http://www.linuxfromscratch.org/lfs/view/7.1/chapter05/adjusting.html
+#
+
+# set PREFIX to LFS_PREFIX (default: /tools)
+PREFIX=${LFS_PREFIX=/tools}
+
+# set LFS_TGT if not set..
+: ${LFS_TGT=$(uname -m)-lfs-linux-gnu}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+
+mee_build() {
+    print_info "creating and substituting specs file"
+    
+    ${LFS_TGT}-gcc -dumpspecs | sed \
+       -e "s@/lib\(64\)\?/ld@${PREFIX}&@g" \
+       -e "/^\*cpp:$/{n;s,$, -isystem ${PREFIX}/include,}" > specs 
+}
+
+# since the package is currently build and not yet installed
+# we can't really test if gcc will find and use our new specs file
+# but we can test resulting specs file here using the test from
+# the LFS documentation
+# so further testing may be needed to perfom this sanity check again
+mee_build_post() {
+    print_info "testing specs file"
+
+    echo 'main(){}' >dummy.c
+    start_cmd ${LFS_TGT}-gcc \
+        -specs specs \
+        -B${PREFIX}/lib \
+        dummy.c
+
+    # if the test (grep) fails, bee will stop building the package
+    # immediatly without giving an error so let's print what we are doing
+    # by using bee's start_cmd function
+    start_cmd readelf -l a.out | start_cmd grep ": ${PREFIX}"
+}
+
+mee_install() {
+    # we split LFS's SPEC= in two parts: SPECDIR and SPEC
+    # since we need to fixup the dirname and later create the dir
+    # in our image directory
+    SPECSDIR=$(dirname $(${LFS_TGT}-gcc -print-libgcc-file-name))
+
+    # fix the dirname - this may not be needed if PREFIX is already
+    # canonicalized - in our test environment it is not so fix this
+    canonical_PREFIX=$(readlink -f ${PREFIX})
+    SPECSDIR=${SPECSDIR/${canonical_PREFIX}/${PREFIX}}
+
+    # finally create the SPECS variable as in LFS's documentation
+    SPECS=${SPECSDIR}/specs
+
+    # create the SPECDIR within our image directory
+    start_cmd mkdir -pv ${D}${SPECSDIR}
+
+    # copy our previously created specs file
+    start_cmd cp -v specs ${D}${SPECS}
+}

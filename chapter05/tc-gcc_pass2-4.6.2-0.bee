@@ -1,0 +1,101 @@
+#!/usr/bin/env beesh
+#
+# this file is part of bee-lfs v7.1
+#  by Marius Tolzmann <marius@mariux.de> 2011-2012
+#
+# this is the bee-file for gcc pass2
+# see LFS 7.1 chapter 5: 5.10
+# http://www.linuxfromscratch.org/lfs/view/7.1/chapter05/gcc-pass2.html
+#
+
+MPFR_VERSION=3.1.0
+GMP_VERSION=5.0.4
+MPC_VERSION=0.9
+
+SRCURL[0]="http://ftp.gnu.org/gnu/gcc/gcc-${PKGVERSION}/gcc-${PKGVERSION}.tar.bz2"
+SRCURL[1]="http://www.mpfr.org/mpfr-${MPFR_VERSION}/mpfr-${MPFR_VERSION}.tar.bz2"
+SRCURL[2]="http://ftp.gnu.org/gnu/gmp/gmp-${GMP_VERSION}.tar.bz2"
+SRCURL[3]="http://www.multiprecision.org/mpc/download/mpc-${MPC_VERSION}.tar.gz"
+
+PATCHURL[0]="http://www.linuxfromscratch.org/patches/lfs/7.1/gcc-${PKGVERSION}-startfiles_fix-1.patch"
+
+# set LFS_TGT if not set..
+: ${LFS_TGT=$(uname -m)-lfs-linux-gnu}
+
+# set PREFIX to LFS_PREFIX (default: /tools)
+PREFIX=${LFS_PREFIX=/tools}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+
+mee_patch_post() {
+    start_cmd sed \
+        -e 's@\./fixinc\.sh@-c true@' \
+        -i.orig gcc/Makefile.in
+
+    start_cmd sed \
+        -e 's/^T_CFLAGS =$/& -fomit-frame-pointer/' \
+        -i.orig gcc/Makefile.in
+
+    for file in $(find gcc/config -name linux64.h -o -name linux.h -o -name sysv4.h) ; do
+        start_cmd sed \
+            -e "s@/lib\(64\)\?\(32\)\?/ld@${PREFIX}&@g" \
+            -e "s@/usr@${PREFIX}@g" \
+            -i.orig ${file}
+        cat >>${file} <<-EOF
+		#undef STANDARD_INCLUDE_DIR
+		#define STANDARD_INCLUDE_DIR 0
+		#define STANDARD_STARTFILE_PREFIX_1 ""
+		#define STANDARD_STARTFILE_PREFIX_2 ""
+		EOF
+        touch ${file}.orig
+    done
+
+    case $(uname -m) in
+        x86_64)
+            for file in $(find gcc/config -name t-linux64) ; do \
+                start_cmd sed \
+                    -e '/MULTILIB_OSDIRNAMES/d' \
+                    -i.orig ${file}
+            done
+            ;;
+    esac
+
+    start_cmd mv -v mpfr-${MPFR_VERSION} mpfr
+    start_cmd mv -v gmp-${GMP_VERSION}   gmp
+    start_cmd mv -v mpc-${MPC_VERSION}   mpc
+}
+
+mee_configure() {
+    CC="${LFS_TGT}-gcc -B${PREFIX}/lib/" \
+    AR=${LFS_TGT}-ar \
+    RANLIB=${LFS_TGT}-ranlib \
+    ${S}/configure \
+        --prefix=${PREFIX} \
+        --with-local-prefix=${PREFIX} \
+        --enable-clocale=gnu \
+        --enable-shared \
+        --enable-threads=posix \
+        --enable-__cxa_atexit \
+        --enable-languages=c,c++ \
+        --disable-libstdcxx-pch \
+        --disable-multilib \
+        --disable-bootstrap \
+        --disable-libgomp \
+        --without-ppl \
+        --without-cloog \
+        --with-mpfr-include=${S}/mpfr/src \
+        --with-mpfr-lib=${B}/mpfr/src/.libs
+}
+
+# fix the lib vs. lib64 issue:
+mee_install_pre() {
+    if [ "$(uname -m)" = "x86_64" ] ; then
+        start_cmd mkdir -pv ${D}/${PREFIX}/lib
+        start_cmd ln -sv lib ${D}/${PREFIX}/lib64
+    fi
+}
+
+mee_install_post() {
+    start_cmd ln -vs gcc ${PREFIX}/bin/cc
+}

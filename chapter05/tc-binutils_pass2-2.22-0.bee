@@ -1,0 +1,46 @@
+#!/usr/bin/env beesh
+#
+# this file is part of bee-lfs v7.1
+#  by Marius Tolzmann <marius@mariux.de> 2011-2012
+#
+# this is the bee-file for binutils pass1
+# see LFS 7.1 chapter 5: 5.9
+# http://www.linuxfromscratch.org/lfs/view/7.1/chapter05/binutils-pass2.html
+#
+
+SRCURL[0]="http://ftp.gnu.org/gnu/binutils/binutils-${PKGVERSION}.tar.bz2"
+
+# set LFS_TGT if not set..
+: ${LFS_TGT=$(uname -m)-lfs-linux-gnu}
+
+# set PREFIX to LFS_PREFIX (default: /tools)
+PREFIX=${LFS_PREFIX=/tools}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+
+# use non-default configure options..
+mee_configure() {
+    CC="${LFS_TGT}-gcc -B${PREFIX}/lib" \
+    AR=${LFS_TGT}-ar \
+    RANLIB=${LFS_TGT}-ranlib \
+    ${S}/configure \
+        --prefix=${PREFIX} \
+        --disable-nls \
+        --with-lib-path=${PREFIX}/lib
+}
+
+# before installing we need to fix the lib vs. lib64 issue:
+mee_install_pre() {
+    if [ "$(uname -m)" = "x86_64" ] ; then
+        start_cmd mkdir -pv ${D}/${PREFIX}/lib
+        start_cmd ln -sv lib ${D}/${PREFIX}/lib64
+    fi
+}
+
+# after installing rebuild ld and install it for later use
+mee_install_post() {
+    start_cmd make -C ld clean
+    start_cmd make -C ld LIB_PATH=/usr/lib:/lib
+    start_cmd cp -v ld/ld-new ${D}${PREFIX}/bin
+}

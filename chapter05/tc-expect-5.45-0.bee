@@ -1,0 +1,37 @@
+#!/usr/bin/env beesh
+#
+# this file is part of bee-lfs v7.1
+#  by Marius Tolzmann <marius@mariux.de> 2011-2012
+#
+# see LFS 7.1 chapter 5: 5.12
+# http://www.linuxfromscratch.org/lfs/view/7.1/chapter05/expect.html
+#
+
+SRCURL[0]="http://prdownloads.sourceforge.net/expect/expect${PKGVERSION}.tar.gz"
+
+# set PREFIX to LFS_PREFIX (default: /tools)
+PREFIX=${LFS_PREFIX=/tools}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+
+#mee_extract() {
+#    bee_extract ${@}
+#}
+
+mee_patch_post() {
+    start_cmd sed \
+        -e 's:/usr/local/bin:/bin:' \
+        -i.orig configure
+}
+
+mee_configure() {
+    start_cmd ${S}/configure \
+        --prefix=${PREFIX} \
+        --with-tcl=${PREFIX}/lib \
+        --with-tclinclude=${PREFIX}/include
+}
+
+mee_install() {
+    bee_install SCRIPTS=""
+}

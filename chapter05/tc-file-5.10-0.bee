@@ -1,0 +1,16 @@
+#!/usr/bin/env beesh
+#
+# this file is part of bee-lfs v7.1
+#  by Marius Tolzmann <marius@mariux.de> 2011-2012
+#
+# see LFS 7.1 chapter 5: 5.20
+# http://www.linuxfromscratch.org/lfs/view/7.1/chapter05/file.html
+
+SRCURL[0]="ftp://ftp.astron.com/pub/file/file-${PKGVERSION}.tar.gz"
+
+# set PREFIX to LFS_PREFIX (default: /tools)
+PREFIX=${LFS_PREFIX=/tools}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+

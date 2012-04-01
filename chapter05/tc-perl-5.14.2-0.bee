@@ -1,0 +1,35 @@
+#!/usr/bin/env beesh
+#
+# this file is part of bee-lfs v7.1
+#  by Marius Tolzmann <marius@mariux.de> 2011-2012
+#
+# see LFS 7.1 chapter 5: 5.29
+# http://www.linuxfromscratch.org/lfs/view/7.1/chapter05/perl.html
+#
+
+SRCURL[0]="http://www.cpan.org/src/5.0/perl-${PKGVERSION}.tar.bz2"
+
+PATCHURL[0]="http://www.linuxfromscratch.org/patches/lfs/7.1/perl-${PKGVERSION}-libc-1.patch"
+
+# set PREFIX to LFS_PREFIX (default: /tools)
+PREFIX=${LFS_PREFIX=/tools}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+
+build_in_sourcedir
+
+mee_configure() {
+    sh Configure -des -Dprefix=${PREFIX}
+}
+
+mee_build() {
+    start_cmd make ${BEE_MAKEFLAGS}
+}
+
+mee_install() {
+    start_cmd mkdir -pv ${D}${BINDIR}
+    start_cmd cp -v perl cpan/podlators/pod2man ${D}${BINDIR}
+    start_cmd mkdir -pv ${D}${LIBDIR}/perl/${PKGVERSION}
+    start_cmd cp -Rv lib/* ${D}${LIBDIR}/perl/${PKGVERSION}
+}

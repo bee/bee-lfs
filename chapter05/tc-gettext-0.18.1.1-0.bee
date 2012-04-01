@@ -1,0 +1,31 @@
+#!/usr/bin/env beesh
+#
+# this file is part of bee-lfs v7.1
+#  by Marius Tolzmann <marius@mariux.de> 2011-2012
+#
+# see LFS 7.1 chapter 5: 5.23
+# http://www.linuxfromscratch.org/lfs/view/7.1/chapter05/gettext.html
+#
+
+SRCURL[0]="http://ftp.gnu.org/gnu/gettext/gettext-${PKGVERSION}.tar.gz"
+
+# set PREFIX to LFS_PREFIX (default: /tools)
+PREFIX=${LFS_PREFIX=/tools}
+
+# set explicit PATH
+export PATH=${PREFIX}/bin:/bin:/usr/bin
+
+mee_configure() {
+    start_cmd ${S}/gettext-tools/configure \
+        --disable-shared
+}
+
+mee_build() {
+    start_cmd make -C gnulib-lib
+    start_cmd make -C src msgfmt
+}
+
+mee_install() {
+    start_cmd mkdir -pv ${D}${BINDIR}
+    start_cmd cp -v src/msgfmt ${D}${BINDIR}
+}

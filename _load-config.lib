@@ -1,0 +1,10 @@
+
+DEFAULTCONFIG=bee-lfs-default.conf
+
+if [ -r "${DEFAULTCONFIG}" ] ; then
+    source "${DEFAULTCONFIG}"
+else
+    echo "WARNING: ${DEFAULTCONFIG} not found.."
+    sleep 1
+fi
+            

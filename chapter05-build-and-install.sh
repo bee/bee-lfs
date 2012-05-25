@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 source _load-config.lib
 
 for bee in \
